@@ -1,0 +1,10 @@
+# Ambientes Virtuais
+venv/
+.venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Configurações de IDE (VS Code)
+.vscode/
