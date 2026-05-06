@@ -1,6 +1,22 @@
 #include <GL/glut.h>
 
+// Tamanhos
 float tamanhoSol = 5.0;
+
+float tamanhoLuaTerra = 0.3;
+
+float tamanhoMercurio = 0.6;
+float tamanhoVenus = 1.1;
+float tamanhoTerra = 1.2;
+float tamanhoMarte = 0.8;
+
+// Distâncias
+float distanciaLua = 1.8; //Distancia da Lua a Terra
+
+float distanciaMercurio = 8.0;
+float distanciaVenus = 11.0;
+float distanciaTerra = 15.0;
+float distanciaMarte = 19.0;
 
 void configuraLuz() {
     // Luz pontual no centro (o Sol)
@@ -18,6 +34,16 @@ void desenhaSol(float tamanho) {
     glEnable(GL_LIGHTING);
 }
 
+void desenhaPlaneta(float distancia, float tamanho, float r, float g, float b) {
+    glPushMatrix();
+        glColor3f(r, g, b); // Cor do planeta
+
+        glTranslatef(distancia, 0.0f, 0.0f);
+
+        glutSolidSphere(tamanho, 20, 20); // Modelagem com primitivas
+    glPopMatrix();
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -29,6 +55,12 @@ void display() {
     configuraLuz();
     
     desenhaSol(tamanhoSol);
+    
+    desenhaPlaneta(distanciaMercurio, tamanhoMercurio, 0.6, 0.6, 0.6); // Mercurio, cinza
+    desenhaPlaneta(distanciaVenus, tamanhoVenus, 0.9, 0.8, 0.5); // Venus, bege
+    desenhaPlaneta(distanciaTerra, tamanhoTerra, 0.2, 0.5, 1.0); // Terra, azul
+    desenhaPlaneta(distanciaMarte, tamanhoMarte, 0.8, 0.2, 0.1); // Marte, vermelho
+
 
     glutSwapBuffers();
 }
