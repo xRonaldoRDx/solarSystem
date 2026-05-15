@@ -9,6 +9,10 @@ float tamanhoMercurio = 0.6;
 float tamanhoVenus = 1.1;
 float tamanhoTerra = 1.2;
 float tamanhoMarte = 0.8;
+float tamanhoJupiter = 3.0;
+float tamanhoSaturno = 2.5;
+float tamanhoUrano = 1.8;
+float tamanhoNetuno = 1.7;
 
 // Distâncias
 float distanciaLua = 1.8; //Distancia da Lua a Terra
@@ -17,6 +21,10 @@ float distanciaMercurio = 8.0;
 float distanciaVenus = 11.0;
 float distanciaTerra = 15.0;
 float distanciaMarte = 19.0;
+float distanciaJupiter = 25.0;
+float distanciaSaturno = 32.0;
+float distanciaUrano = 38.0;
+float distanciaNetuno = 44.0;
 
 void configuraLuz() {
     // Luz pontual no centro (o Sol)
@@ -48,7 +56,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0.0, 10.0, 30.0, // Câmera afastada para observar o sistema
+    gluLookAt(0.0, 10.0, 80.0, // Câmera afastada para observar o sistema
             0.0, 0.0, 0.0,
             0.0, 1.0, 0.0);
 
@@ -60,7 +68,10 @@ void display() {
     desenhaPlaneta(distanciaVenus, tamanhoVenus, 0.9, 0.8, 0.5); // Venus, bege
     desenhaPlaneta(distanciaTerra, tamanhoTerra, 0.2, 0.5, 1.0); // Terra, azul
     desenhaPlaneta(distanciaMarte, tamanhoMarte, 0.8, 0.2, 0.1); // Marte, vermelho
-
+    desenhaPlaneta(distanciaJupiter, tamanhoJupiter, 0.8, 0.6, 0.4); // Jupiter, marrom
+    desenhaPlaneta(distanciaSaturno, tamanhoSaturno, 0.9, 0.8, 0.6); // Saturno, dourado
+    desenhaPlaneta(distanciaUrano, tamanhoUrano, 0.6, 0.9, 0.9); // Urano, ciano
+    desenhaPlaneta(distanciaNetuno, tamanhoNetuno, 0.2, 0.3, 0.8); // Netuno, azul escuro
 
     glutSwapBuffers();
 }
@@ -82,7 +93,7 @@ void reshape(int w, int h) {
     glLoadIdentity();
     
     // Define o ângulo de visão, proporção da tela e distância de corte (perto e longe)
-    gluPerspective(45.0, (double)w / (double)h, 1.0, 100.0);
+    gluPerspective(45.0, (double)w / (double)h, 1.0, 200.0);
     
     glMatrixMode(GL_MODELVIEW); // Volta para o modo de desenho
 }
@@ -90,7 +101,13 @@ void reshape(int w, int h) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(1920, 1080);
+
+    // --- DETECTA A RESOLUÇÃO DO MONITOR ---
+    int larguraScren = glutGet(GLUT_SCREEN_WIDTH);
+    int alturaScreen = glutGet(GLUT_SCREEN_HEIGHT);
+
+    // Define o tamanho da janela para o tamanho detectado
+    glutInitWindowSize(larguraScren, alturaScreen); 
     glutCreateWindow("Sistema Solar - Open GL");
 
     inicializa();
