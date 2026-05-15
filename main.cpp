@@ -1,10 +1,11 @@
 #include <GL/glut.h>
 
+// Angulo para animaçoes
+float anguloGlobal = 0.0f;
+
 // Tamanhos
 float tamanhoSol = 5.0;
-
 float tamanhoLuaTerra = 0.3;
-
 float tamanhoMercurio = 0.6;
 float tamanhoVenus = 1.1;
 float tamanhoTerra = 1.2;
@@ -16,7 +17,6 @@ float tamanhoNetuno = 1.7;
 
 // Distâncias
 float distanciaLua = 1.8; //Distancia da Lua a Terra
-
 float distanciaMercurio = 8.0;
 float distanciaVenus = 11.0;
 float distanciaTerra = 15.0;
@@ -25,6 +25,17 @@ float distanciaJupiter = 25.0;
 float distanciaSaturno = 32.0;
 float distanciaUrano = 38.0;
 float distanciaNetuno = 44.0;
+
+// Velocidades de Translação
+float velocidadeLua = 13.0f;
+float velocidadeMercurio = 4.15f;
+float velocidadeVenus = 1.62f;
+float velocidadeTerra = 1.0f;
+float velocidadeMarte = 0.53f;
+float velocidadeJupiter = 0.20f;
+float velocidadeSaturno = 0.15f;
+float velocidadeUrano = 0.10f;
+float velocidadeNetuno = 0.05f;
 
 void configuraLuz() {
     // Luz pontual no centro (o Sol)
@@ -42,14 +53,23 @@ void desenhaSol(float tamanho) {
     glEnable(GL_LIGHTING);
 }
 
-void desenhaPlaneta(float distancia, float tamanho, float r, float g, float b) {
-    glPushMatrix();
-        glColor3f(r, g, b); // Cor do planeta
-
+void desenhaPlaneta(float distancia, float tamanho, float velocidade, float r, float g, float b) {
+glPushMatrix();
+        // Movimento de translação
+        glRotatef(anguloGlobal * velocidade, 0.0f, 1.0f, 0.0f);
         glTranslatef(distancia, 0.0f, 0.0f);
 
-        glutSolidSphere(tamanho, 20, 20); // Modelagem com primitivas
+        // Movimento de rotação
+        glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
+
+        glColor3f(r, g, b);
+        glutSolidSphere(tamanho, 20, 20);
     glPopMatrix();
+}
+
+void idle() {
+    anguloGlobal += 0.1f; // Incrementa o ângulo continuamente
+    glutPostRedisplay();
 }
 
 void display() {
@@ -64,14 +84,14 @@ void display() {
     
     desenhaSol(tamanhoSol);
     
-    desenhaPlaneta(distanciaMercurio, tamanhoMercurio, 0.6, 0.6, 0.6); // Mercurio, cinza
-    desenhaPlaneta(distanciaVenus, tamanhoVenus, 0.9, 0.8, 0.5); // Venus, bege
-    desenhaPlaneta(distanciaTerra, tamanhoTerra, 0.2, 0.5, 1.0); // Terra, azul
-    desenhaPlaneta(distanciaMarte, tamanhoMarte, 0.8, 0.2, 0.1); // Marte, vermelho
-    desenhaPlaneta(distanciaJupiter, tamanhoJupiter, 0.8, 0.6, 0.4); // Jupiter, marrom
-    desenhaPlaneta(distanciaSaturno, tamanhoSaturno, 0.9, 0.8, 0.6); // Saturno, dourado
-    desenhaPlaneta(distanciaUrano, tamanhoUrano, 0.6, 0.9, 0.9); // Urano, ciano
-    desenhaPlaneta(distanciaNetuno, tamanhoNetuno, 0.2, 0.3, 0.8); // Netuno, azul escuro
+    desenhaPlaneta(distanciaMercurio, tamanhoMercurio, velocidadeMercurio, 0.6, 0.6, 0.6); // Mercurio
+    desenhaPlaneta(distanciaVenus, tamanhoVenus, velocidadeVenus, 0.9, 0.8, 0.5); // Venus
+    desenhaPlaneta(distanciaTerra, tamanhoTerra, velocidadeTerra, 0.2, 0.5, 1.0); // Terra
+    desenhaPlaneta(distanciaMarte, tamanhoMarte, velocidadeMarte, 0.8, 0.2, 0.1); // Marte
+    desenhaPlaneta(distanciaJupiter, tamanhoJupiter, velocidadeJupiter, 0.8, 0.6, 0.4); // Jupiter
+    desenhaPlaneta(distanciaSaturno, tamanhoSaturno, velocidadeSaturno, 0.9, 0.8, 0.6); // Saturno
+    desenhaPlaneta(distanciaUrano, tamanhoUrano, velocidadeUrano, 0.6, 0.9, 0.9); // Urano
+    desenhaPlaneta(distanciaNetuno, tamanhoNetuno, velocidadeNetuno, 0.2, 0.3, 0.8); // Netuno
 
     glutSwapBuffers();
 }
@@ -114,6 +134,8 @@ int main(int argc, char** argv) {
     
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
+
+    glutIdleFunc(idle);
 
     glutMainLoop();
     return 0;
