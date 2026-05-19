@@ -72,6 +72,41 @@ void idle() {
     glutPostRedisplay();
 }
 
+void desenhaSistemaTerra(float distanciaTerra, float tamanhoTerra, float velocidadeTerra, float distanciaLua, float tamanhoLua, float velocidadeLua){
+    glPushMatrix();
+        // Translação da Terra ao redor do Sol
+        glRotatef(anguloGlobal * velocidadeTerra, 0.0f, 1.0f, 0.0f);
+        glTranslatef(distanciaTerra, 0.0f, 0.0f);
+
+        // --- BLOCO TERRA ---
+        glPushMatrix();
+            // Rotação da Terra
+            glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
+
+            glColor3f(0.2, 0.5, 1.0); // Cor Terra, azul
+            glutSolidSphere(tamanhoTerra, 20, 20);
+        glPopMatrix();
+
+        // --- BLOCO LUA ---
+        glPushMatrix();
+            
+            // Inclinação orbital da Lua em relação à Terra (20 graus no eixo Z)
+            glRotatef(20.0f, 0.0f, 0.0f, 1.0f); 
+
+            // Movimento de translação da Lua ao redor da Terra
+            glRotatef(anguloGlobal * velocidadeLua, 0.0f, 1.0f, 0.0f);
+            glTranslatef(distanciaLua, 0.0f, 0.0f);
+
+            // Rotação da Lua
+            glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
+
+            glColor3f(0.8f, 0.8f, 0.8f); // Cor Lua, cinza
+            glutSolidSphere(tamanhoLua, 20, 20);
+        glPopMatrix();
+
+    glPopMatrix();
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -86,7 +121,9 @@ void display() {
     
     desenhaPlaneta(distanciaMercurio, tamanhoMercurio, velocidadeMercurio, 0.6, 0.6, 0.6); // Mercurio
     desenhaPlaneta(distanciaVenus, tamanhoVenus, velocidadeVenus, 0.9, 0.8, 0.5); // Venus
-    desenhaPlaneta(distanciaTerra, tamanhoTerra, velocidadeTerra, 0.2, 0.5, 1.0); // Terra
+
+    desenhaSistemaTerra(distanciaTerra, tamanhoTerra, velocidadeTerra, distanciaLua, tamanhoLuaTerra, velocidadeLua);
+
     desenhaPlaneta(distanciaMarte, tamanhoMarte, velocidadeMarte, 0.8, 0.2, 0.1); // Marte
     desenhaPlaneta(distanciaJupiter, tamanhoJupiter, velocidadeJupiter, 0.8, 0.6, 0.4); // Jupiter
     desenhaPlaneta(distanciaSaturno, tamanhoSaturno, velocidadeSaturno, 0.9, 0.8, 0.6); // Saturno
