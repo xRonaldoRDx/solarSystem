@@ -67,9 +67,12 @@ glPushMatrix();
     glPopMatrix();
 }
 
-void idle() {
-    anguloGlobal += 0.1f; // Incrementa o ângulo continuamente
+void atualizaTemporizador(int valor) {
+    anguloGlobal += 0.5f;
     glutPostRedisplay();
+    
+    // Chama novamente após 16 milissegundos (~60 FPS)
+    glutTimerFunc(16, atualizaTemporizador, 0); 
 }
 
 void desenhaSistemaTerra(float distanciaTerra, float tamanhoTerra, float velocidadeTerra, float distanciaLua, float tamanhoLua, float velocidadeLua){
@@ -172,7 +175,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
 
-    glutIdleFunc(idle);
+    glutTimerFunc(16, atualizaTemporizador, 0);
 
     glutMainLoop();
     return 0;
