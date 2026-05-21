@@ -5,8 +5,8 @@
 bool girandoCamera = false;
 int ultimoX = 0, ultimoY = 0;
 float anguloCameraX = 0.0f;
-float anguloCameraY = 10.0f; // Inicia inclinada para cima
-float distanciaCamera = 80.0f;
+float anguloCameraY = 45.0f; // Inicia inclinada acima
+float distanciaCamera = 110.0f;
 
 // Angulo para animaçoes
 float anguloGlobal = 0.0f;
@@ -61,7 +61,24 @@ void desenhaSol(float tamanho) {
     glEnable(GL_LIGHTING);
 }
 
+void desenhaOrbita(float raio) {
+    glDisable(GL_LIGHTING); // Desliga a luz a orbita ter cor sólida
+    glColor3f(0.3f, 0.3f, 0.3f); // Cor órbita (cinza escuro)
+    
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 100; i++) {
+        // Calcula 100 pontos ao longo de um círculo completo (2 * PI)
+        float angulo = i * 2.0f * 3.14159f / 100.0f; 
+        glVertex3f(raio * cos(angulo), 0.0f, raio * sin(angulo));
+    }
+    glEnd();
+    
+    glEnable(GL_LIGHTING); // Liga a novamente luz dos planetas
+}
+
 void desenhaPlaneta(float distancia, float tamanho, float velocidade, float r, float g, float b) {
+    desenhaOrbita(distancia);
+    
     glPushMatrix();
         // Movimento de translação
         glRotatef(anguloGlobal * velocidade, 0.0f, 1.0f, 0.0f);
@@ -84,6 +101,8 @@ void atualizaTemporizador(int valor) {
 }
 
 void desenhaSistemaTerra(float distanciaTerra, float tamanhoTerra, float velocidadeTerra, float distanciaLua, float tamanhoLua, float velocidadeLua){
+    desenhaOrbita(distanciaTerra);
+    
     glPushMatrix();
         // Translação da Terra ao redor do Sol
         glRotatef(anguloGlobal * velocidadeTerra, 0.0f, 1.0f, 0.0f);
@@ -104,6 +123,9 @@ void desenhaSistemaTerra(float distanciaTerra, float tamanhoTerra, float velocid
             // Inclinação orbital da Lua em relação à Terra (20 graus no eixo Z)
             glRotatef(20.0f, 0.0f, 0.0f, 1.0f); 
 
+            // Orbita Lua
+            desenhaOrbita(distanciaLua);
+            
             // Movimento de translação da Lua ao redor da Terra
             glRotatef(anguloGlobal * velocidadeLua, 0.0f, 1.0f, 0.0f);
             glTranslatef(distanciaLua, 0.0f, 0.0f);
