@@ -1,4 +1,12 @@
 #include <GL/glut.h>
+#include <math.h>
+
+// Variaveis de controle da camera
+bool girandoCamera = false;
+int ultimoX = 0, ultimoY = 0;
+float anguloCameraX = 0.0f;
+float anguloCameraY = 10.0f; // Inicia inclinada para cima
+float distanciaCamera = 80.0f;
 
 // Angulo para animaçoes
 float anguloGlobal = 0.0f;
@@ -54,7 +62,7 @@ void desenhaSol(float tamanho) {
 }
 
 void desenhaPlaneta(float distancia, float tamanho, float velocidade, float r, float g, float b) {
-glPushMatrix();
+    glPushMatrix();
         // Movimento de translação
         glRotatef(anguloGlobal * velocidade, 0.0f, 1.0f, 0.0f);
         glTranslatef(distancia, 0.0f, 0.0f);
@@ -114,9 +122,20 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(0.0, 10.0, 80.0, // Câmera afastada para observar o sistema
-            0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0);
+    // --- CÂMERA ---
+    // Converte os ângulos de graus para radianos
+    float radX = anguloCameraX * 3.14159f / 180.0f;
+    float radY = anguloCameraY * 3.14159f / 180.0f;
+
+    // Calcula a posição x, y, z usando coordenadas esféricas
+    float camX = distanciaCamera * cos(radY) * sin(radX);
+    float camY = distanciaCamera * sin(radY);
+    float camZ = distanciaCamera * cos(radY) * cos(radX);
+
+    // Aplica a nova câmera
+    gluLookAt(camX, camY, camZ, // Posição calculada
+              0.0, 0.0, 0.0,    // Ponto para onde olha (Sol)
+              0.0, 1.0, 0.0);   // Vetor "Cima"
 
     configuraLuz();
     
@@ -158,6 +177,37 @@ void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW); // Volta para o modo de desenho
 }
 
+void mouseClick(int button, int state, int x, int y) {
+    if (button == GLUT_RIGHT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            girandoCamera = true;
+            ultimoX = x;
+            ultimoY = y;
+        } else {
+            girandoCamera = false;
+        }
+    }
+}
+
+void mouseMove(int x, int y) {
+    if (girandoCamera) {
+        int deltaX = x - ultimoX;
+        int deltaY = y - ultimoY;
+
+        // Sensibilidade do movimento
+        anguloCameraX += deltaX * 0.5f; 
+        anguloCameraY += deltaY * 0.5f; 
+
+        // Limita o eixo Y
+        if (anguloCameraY > 89.0f) anguloCameraY = 89.0f;
+        if (anguloCameraY < -89.0f) anguloCameraY = -89.0f;
+
+        ultimoX = x;
+        ultimoY = y;
+        glutPostRedisplay();
+    }
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -169,6 +219,10 @@ int main(int argc, char** argv) {
     // Define o tamanho da janela para o tamanho detectado
     glutInitWindowSize(larguraScren, alturaScreen); 
     glutCreateWindow("Sistema Solar - Open GL");
+
+    // --- Movimento Câmera ---
+    glutMouseFunc(mouseClick);
+    glutMotionFunc(mouseMove);
 
     inicializa();
     
