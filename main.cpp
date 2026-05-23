@@ -1,5 +1,9 @@
 #include <GL/glut.h>
 #include <math.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+GLUquadric* quadric;
 
 // Variaveis de controle da camera
 bool girandoCamera = false;
@@ -45,6 +49,50 @@ float velocidadeSaturno = 0.15f;
 float velocidadeUrano = 0.10f;
 float velocidadeNetuno = 0.05f;
 
+// IDs das texturas dos astros
+GLuint texturaSol;
+GLuint texturaMercurio;
+GLuint texturaVenus;
+GLuint texturaTerra;
+GLuint texturaLua;
+GLuint texturaMarte;
+GLuint texturaJupiter;
+GLuint texturaSaturno;
+GLuint texturaUrano;
+GLuint texturaNetuno;
+
+GLuint carregaTextura(const char* caminho) {
+    GLuint texturaID;
+    glGenTextures(1, &texturaID);
+    glBindTexture(GL_TEXTURE_2D, texturaID);
+
+    // Configura o comportamento da textura (repetição e filtro de suavização)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Carrega a imagem usando stb_image
+    int largura, altura, canaisCores;
+    stbi_set_flip_vertically_on_load(true); // Inverte a imagem (OpenGL lê de baixo para cima)
+    unsigned char* dados = stbi_load(caminho, &largura, &altura, &canaisCores, 0);
+
+    if (dados) {
+        // Verifica se a imagem é JPG (3 canais RGB) ou PNG (4 canais RGBA)
+        GLenum formato = (canaisCores == 4) ? GL_RGBA : GL_RGB;
+        
+        // Envia os pixels para a placa de vídeo
+        glTexImage2D(GL_TEXTURE_2D, 0, formato, largura, altura, 0, formato, GL_UNSIGNED_BYTE, dados);
+    } else {
+        printf("Falha ao carregar a textura: %s\n", caminho);
+    }
+    
+    // Limpa a imagem da memória RAM
+    stbi_image_free(dados);
+    
+    return texturaID;
+}
+
 void configuraLuz() {
     // Luz pontual no centro (o Sol)
     GLfloat luzBranca[] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -56,27 +104,36 @@ void configuraLuz() {
 
 void desenhaSol(float tamanho) {
     glDisable(GL_LIGHTING); // Sol não recebe luz, ele emite
-    glColor3f(1.0f, 1.0f, 0.0f); // Amarelo
-    glutSolidSphere(tamanho, 30, 30);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glBindTexture(GL_TEXTURE_2D, texturaSol);
+
+    glPushMatrix();
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluSphere(quadric, tamanho, 30, 30);
+    glPopMatrix();
+    
     glEnable(GL_LIGHTING);
 }
 
 void desenhaOrbita(float raio) {
-    glDisable(GL_LIGHTING); // Desliga a luz a orbita ter cor sólida
-    glColor3f(0.3f, 0.3f, 0.3f); // Cor órbita (cinza escuro)
+    glDisable(GL_LIGHTING);   // Desliga a luz
+    glDisable(GL_TEXTURE_2D); // DESLIGA A TEXTURA PARA A LINHA
+
+    glColor3f(0.3f, 0.3f, 0.3f); // Cor da órbita (cinza escuro)
     
     glBegin(GL_LINE_LOOP);
     for (int i = 0; i < 100; i++) {
-        // Calcula 100 pontos ao longo de um círculo completo (2 * PI)
         float angulo = i * 2.0f * 3.14159f / 100.0f; 
         glVertex3f(raio * cos(angulo), 0.0f, raio * sin(angulo));
     }
     glEnd();
     
-    glEnable(GL_LIGHTING); // Liga a novamente luz dos planetas
+    glEnable(GL_TEXTURE_2D); // RELIGA A TEXTURA PARA OS PLANETAS
+    glEnable(GL_LIGHTING);   // Religa a luz
 }
 
-void desenhaPlaneta(float distancia, float tamanho, float velocidade, float r, float g, float b) {
+void desenhaPlaneta(float distancia, float tamanho, float velocidade, GLuint texturaID) {
     desenhaOrbita(distancia);
     
     glPushMatrix();
@@ -87,8 +144,11 @@ void desenhaPlaneta(float distancia, float tamanho, float velocidade, float r, f
         // Movimento de rotação
         glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
 
-        glColor3f(r, g, b);
-        glutSolidSphere(tamanho, 20, 20);
+        glColor3f(1.0f, 1.0f, 1.0f);
+
+        glBindTexture(GL_TEXTURE_2D, texturaID);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluSphere(quadric, tamanho, 30, 30);
     glPopMatrix();
 }
 
@@ -113,8 +173,10 @@ void desenhaSistemaTerra(float distanciaTerra, float tamanhoTerra, float velocid
             // Rotação da Terra
             glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
 
-            glColor3f(0.2, 0.5, 1.0); // Cor Terra, azul
-            glutSolidSphere(tamanhoTerra, 20, 20);
+            glColor3f(1.0, 1.0, 1.0);
+            glBindTexture(GL_TEXTURE_2D, texturaTerra);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluSphere(quadric, tamanhoTerra, 30, 30);
         glPopMatrix();
 
         // --- BLOCO LUA ---
@@ -133,10 +195,11 @@ void desenhaSistemaTerra(float distanciaTerra, float tamanhoTerra, float velocid
             // Rotação da Lua
             glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
 
-            glColor3f(0.8f, 0.8f, 0.8f); // Cor Lua, cinza
-            glutSolidSphere(tamanhoLua, 20, 20);
+            glColor3f(1.0, 1.0, 1.0);
+            glBindTexture(GL_TEXTURE_2D, texturaLua);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluSphere(quadric, tamanhoLua, 30, 30);
         glPopMatrix();
-
     glPopMatrix();
 }
 
@@ -163,16 +226,16 @@ void display() {
     
     desenhaSol(tamanhoSol);
     
-    desenhaPlaneta(distanciaMercurio, tamanhoMercurio, velocidadeMercurio, 0.6, 0.6, 0.6); // Mercurio
-    desenhaPlaneta(distanciaVenus, tamanhoVenus, velocidadeVenus, 0.9, 0.8, 0.5); // Venus
+    desenhaPlaneta(distanciaMercurio, tamanhoMercurio, velocidadeMercurio, texturaMercurio); // Mercurio
+    desenhaPlaneta(distanciaVenus, tamanhoVenus, velocidadeVenus, texturaVenus); // Venus
 
     desenhaSistemaTerra(distanciaTerra, tamanhoTerra, velocidadeTerra, distanciaLua, tamanhoLuaTerra, velocidadeLua);
 
-    desenhaPlaneta(distanciaMarte, tamanhoMarte, velocidadeMarte, 0.8, 0.2, 0.1); // Marte
-    desenhaPlaneta(distanciaJupiter, tamanhoJupiter, velocidadeJupiter, 0.8, 0.6, 0.4); // Jupiter
-    desenhaPlaneta(distanciaSaturno, tamanhoSaturno, velocidadeSaturno, 0.9, 0.8, 0.6); // Saturno
-    desenhaPlaneta(distanciaUrano, tamanhoUrano, velocidadeUrano, 0.6, 0.9, 0.9); // Urano
-    desenhaPlaneta(distanciaNetuno, tamanhoNetuno, velocidadeNetuno, 0.2, 0.3, 0.8); // Netuno
+    desenhaPlaneta(distanciaMarte, tamanhoMarte, velocidadeMarte, texturaMarte); // Marte
+    desenhaPlaneta(distanciaJupiter, tamanhoJupiter, velocidadeJupiter, texturaJupiter); // Jupiter
+    desenhaPlaneta(distanciaSaturno, tamanhoSaturno, velocidadeSaturno, texturaSaturno); // Saturno
+    desenhaPlaneta(distanciaUrano, tamanhoUrano, velocidadeUrano, texturaUrano); // Urano
+    desenhaPlaneta(distanciaNetuno, tamanhoNetuno, velocidadeNetuno, texturaNetuno); // Netuno
 
     glutSwapBuffers();
 }
@@ -186,6 +249,24 @@ void inicializa() {
     
     // Configura o material para reagir à luz
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+    // Configurações para textura
+    glEnable(GL_TEXTURE_2D); // Ativa o uso de texturas no OpenGL
+    
+    quadric = gluNewQuadric(); // Inicializa o desenhador de esferas
+    gluQuadricTexture(quadric, GL_TRUE);
+    gluQuadricNormals(quadric, GLU_SMOOTH);
+
+    texturaSol = carregaTextura("textures/sun.jpg");
+    texturaMercurio = carregaTextura("textures/mercury.jpg");
+    texturaVenus = carregaTextura("textures/venus.jpg");
+    texturaTerra = carregaTextura("textures/earth.jpg");
+    texturaLua = carregaTextura("textures/moon.jpg");
+    texturaMarte = carregaTextura("textures/mars.jpg");
+    texturaJupiter = carregaTextura("textures/jupiter.jpg");
+    texturaSaturno = carregaTextura("textures/saturn.jpg");
+    texturaUrano = carregaTextura("textures/uranus.jpg");
+    texturaNetuno = carregaTextura("textures/neptune.jpg");
 }
 
 void reshape(int w, int h) {
