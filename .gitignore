@@ -1,10 +1,36 @@
+# =========================
+# Arquivos do C++ / Compilação
+# =========================
+# Executáveis
+*.exe
+*.out
+*.app
+
+# Arquivos de objeto (Gerados durante a compilação)
+*.o
+*.obj
+
+# Arquivos de log e debug da compilação
+*.log
+*.pdb
+*.ilk
+
+# =========================
+# Configurações de IDE
+# =========================
+.vscode/
+.vs/
+*.suo
+*.user
+
+# =========================
 # Ambientes Virtuais
+# =========================
 venv/
 .venv/
 
+# =========================
 # Sistema
+# =========================
 .DS_Store
 Thumbs.db
-
-# Configurações de IDE (VS Code)
-.vscode/
