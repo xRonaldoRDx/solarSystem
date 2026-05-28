@@ -58,6 +58,7 @@ GLuint texturaLua;
 GLuint texturaMarte;
 GLuint texturaJupiter;
 GLuint texturaSaturno;
+GLuint texturaAnelSaturno;
 GLuint texturaUrano;
 GLuint texturaNetuno;
 
@@ -206,6 +207,41 @@ void desenhaSistemaTerra(float distanciaTerra, float tamanhoTerra, float velocid
     glPopMatrix();
 }
 
+void desenhaSistemaSaturno(float distanciaSaturno, float tamanhoSaturno, float velocidadeSaturno) {
+    desenhaOrbita(distanciaSaturno);
+
+    glPushMatrix();
+        // Translação de Saturno ao redor do Sol
+        glRotatef(anguloGlobal * velocidadeSaturno, 0.0f, 1.0f, 0.0f);
+        glTranslatef(distanciaSaturno, 0.0f, 0.0f);
+
+        // --- BLOCO SATURNO ---
+        glPushMatrix();
+            // Rotação de Saturno
+            glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
+
+            glColor3f(1.0, 1.0, 1.0);
+            glBindTexture(GL_TEXTURE_2D, texturaSaturno);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluSphere(quadric, tamanhoSaturno, 30, 30);
+        glPopMatrix();
+
+        // --- BLOCO ANEIS ---
+        glPushMatrix();
+            // Inclinação orbital dos aneis em relação a saturno
+            glRotatef(-20.0f, 0.0f, 0.0f, 1.0f); 
+
+            // Rotação dos Anéis
+            glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f);
+
+            glColor3f(1.0, 1.0, 1.0);
+            glBindTexture(GL_TEXTURE_2D, texturaAnelSaturno);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(quadric, tamanhoSaturno + 0.2f, tamanhoSaturno + 1.5f, 30, 1);
+        glPopMatrix();
+    glPopMatrix();
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -232,11 +268,13 @@ void display() {
     desenhaPlaneta(distanciaMercurio, tamanhoMercurio, velocidadeMercurio, texturaMercurio); // Mercurio
     desenhaPlaneta(distanciaVenus, tamanhoVenus, velocidadeVenus, texturaVenus); // Venus
 
-    desenhaSistemaTerra(distanciaTerra, tamanhoTerra, velocidadeTerra, distanciaLua, tamanhoLuaTerra, velocidadeLua);
+    desenhaSistemaTerra(distanciaTerra, tamanhoTerra, velocidadeTerra, distanciaLua, tamanhoLuaTerra, velocidadeLua); // Terra
 
     desenhaPlaneta(distanciaMarte, tamanhoMarte, velocidadeMarte, texturaMarte); // Marte
     desenhaPlaneta(distanciaJupiter, tamanhoJupiter, velocidadeJupiter, texturaJupiter); // Jupiter
-    desenhaPlaneta(distanciaSaturno, tamanhoSaturno, velocidadeSaturno, texturaSaturno); // Saturno
+
+    desenhaSistemaSaturno(distanciaSaturno, tamanhoSaturno, velocidadeSaturno); // Saturno e Anéis
+
     desenhaPlaneta(distanciaUrano, tamanhoUrano, velocidadeUrano, texturaUrano); // Urano
     desenhaPlaneta(distanciaNetuno, tamanhoNetuno, velocidadeNetuno, texturaNetuno); // Netuno
 
@@ -268,6 +306,7 @@ void inicializa() {
     texturaMarte = carregaTextura("textures/mars.jpg");
     texturaJupiter = carregaTextura("textures/jupiter.jpg");
     texturaSaturno = carregaTextura("textures/saturn.jpg");
+    texturaAnelSaturno = carregaTextura("textures/saturnRing.png");
     texturaUrano = carregaTextura("textures/uranus.jpg");
     texturaNetuno = carregaTextura("textures/neptune.jpg");
 }
