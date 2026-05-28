@@ -109,6 +109,9 @@ void desenhaSol(float tamanho) {
     glBindTexture(GL_TEXTURE_2D, texturaSol);
 
     glPushMatrix();
+        // Movimento de rotação
+        glRotatef(anguloGlobal * 2.0f, 0.0f, 1.0f, 0.0f); 
+
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
         gluSphere(quadric, tamanho, 30, 30);
     glPopMatrix();
