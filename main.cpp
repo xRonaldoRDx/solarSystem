@@ -323,6 +323,7 @@ void reshape(int w, int h) {
 }
 
 void mouseClick(int button, int state, int x, int y) {
+    // --- Rotação da Câmera ---
     if (button == GLUT_RIGHT_BUTTON) {
         if (state == GLUT_DOWN) {
             girandoCamera = true;
@@ -330,6 +331,24 @@ void mouseClick(int button, int state, int x, int y) {
             ultimoY = y;
         } else {
             girandoCamera = false;
+        }
+    }
+
+    // --- Sistema de Zoom ---
+    if (state == GLUT_DOWN) {
+        if (button == 3) { 
+            distanciaCamera -= 5.0f; 
+            
+            if (distanciaCamera < 10.0f) {
+                distanciaCamera = 10.0f;
+            }
+        } 
+        else if (button == 4) { 
+            distanciaCamera += 5.0f;
+            
+            if (distanciaCamera > 150.0f) {
+                distanciaCamera = 150.0f;
+            }
         }
     }
 }
